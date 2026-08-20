@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="ja" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>経費申請ページ</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --panel-2: #f9fbff;
+      --text: #172033;
+      --muted: #64748b;
+      --line: #d8e0ef;
+      --primary: #2563eb;
+      --primary-2: #1d4ed8;
+      --accent: #14b8a6;
+      --warning: #f59e0b;
+      --danger: #dc2626;
+      --success: #16a34a;
+      --shadow: 0 18px 50px rgba(15, 23, 42, 0.12);
+      --radius: 18px;
+      --radius-sm: 12px;
+      --focus: 0 0 0 4px rgba(37, 99, 235, 0.18);
+      font-family: "Segoe UI", "Yu Gothic UI", "Meiryo", sans-serif;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --panel: #111c31;
+        --panel-2: #17233a;
+        --text: #e5edf8;
+        --muted: #9fb0ca;
+        --line: #27364f;
+        --primary: #60a5fa;
+        --primary-2: #3b82f6;
+        --accent: #2dd4bf;
+        --warning: #fbbf24;
+        --danger: #f87171;
+        --success: #4ade80;
+        --shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 10% 0%, rgba(37, 99, 235, 0.16), transparent 35%),
+        radial-gradient(circle at 90% 10%, rgba(20, 184, 166, 0.13), transparent 35%),
+        var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .app {
+      max-width: 1180px;
+      margin-inline: auto;
+      padding: 28px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.4fr 0.9fr;
+      gap: 22px;
+      align-items: stretch;
+      margin-block-end: 22px;
+    }
+
+    .hero-card,
+    .panel {
+      background: color-mix(in srgb, var(--panel) 94%, transparent);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-card {
+      padding: 28px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hero-card::after {
+      content: "";
+      position: absolute;
+      inset-block-start: -68px;
+      inset-inline-end: -60px;
+      width: 210px;
+      height: 210px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.18), rgba(20, 184, 166, 0.18));
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--primary);
+      background: color-mix(in srgb, var(--primary) 12%, transparent);
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      margin-block-end: 14px;
+    }
+
+    h1 {
+      font-size: clamp(30px, 4vw, 48px);
+      margin: 0 0 12px;
+      line-height: 1.08;
+      letter-spacing: -0.04em;
+    }
+
+    .lead {
+      color: var(--muted);
+      margin: 0;
+      max-width: 760px;
+      line-height: 1.75;
+    }
+
+    .summary {
+      padding: 22px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding-block-end: 12px;
+      border-block-end: 1px solid var(--line);
+    }
+
+    .summary-item:last-child {
+      border-block-end: 0;
+      padding-block-end: 0;
+    }
+
+    .summary-label {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .summary-value {
+      font-weight: 800;
+      text-align: end;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 22px;
+      align-items: start;
+    }
+
+    .side {
+      position: sticky;
+      inset-block-start: 20px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .steps {
+      padding: 18px;
+    }
+
+    .step {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      padding: 12px;
+      border-radius: 14px;
+      color: var(--muted);
+    }
+
+    .step.active {
+      background: color-mix(in srgb, var(--primary) 12%, transparent);
+      color: var(--text);
+    }
+
+    .step.done .dot {
+      background: var(--success);
+      color: #fff;
+    }
+
+    .dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--panel-2);
+      color: var(--primary);
+      border: 1px solid var(--line);
+      font-size: 13px;
+      font-weight: 800;
+      flex: 0 0 auto;
+    }
+
+    .panel {
+      padding: 22px;
+      margin-block-end: 18px;
+    }
+
+    .panel-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: start;
+      margin-block-end: 18px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: -0.02em;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .dropzone {
+      border: 2px dashed color-mix(in srgb, var(--primary) 45%, var(--line));
+      border-radius: var(--radius);
+      background: var(--panel-2);
+      padding: 24px;
+      display: grid;
+      gap: 14px;
+      justify-items: center;
+      text-align: center;
+      transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease;
+    }
+
+    .dropzone.dragging {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      background: color-mix(in srgb, var(--accent) 10%, var(--panel-2));
+    }
+
+    .upload-icon {
+      width: 62px;
+      height: 62px;
+      display: grid;
+      place-items: center;
+      border-radius: 18px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: #fff;
+      font-size: 28px;
+      font-weight: 800;
+    }
+
+    .file-input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 11px 15px;
+      border-radius: 12px;
+      font-weight: 800;
+      border: 1px solid transparent;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      outline: none;
+      box-shadow: var(--focus);
+    }
+
+    .btn.primary {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .btn.primary:hover {
+      background: var(--primary-2);
+    }
+
+    .btn.secondary {
+      color: var(--text);
+      background: var(--panel-2);
+      border-color: var(--line);
+    }
+
+    .btn.ghost {
+      color: var(--primary);
+      background: transparent;
+      border-color: color-mix(in srgb, var(--primary) 35%, transparent);
+    }
+
+    .btn.danger {
+      color: #fff;
+      background: var(--danger);
+      padding: 8px 10px;
+      border-radius: 10px;
+      font-size: 13px;
+    }
+
+    .preview-grid {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 18px;
+      margin-block-start: 18px;
+      align-items: stretch;
+    }
+
+    .preview-box {
+      min-height: 170px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(135deg, color-mix(in srgb, var(--primary) 8%, transparent), transparent),
+        var(--panel);
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      color: var(--muted);
+      padding: 12px;
+    }
+
+    .preview-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 12px;
+    }
+
+    .ocr-card {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+      background: var(--panel-2);
+      display: grid;
+      gap: 10px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--primary);
+      background: color-mix(in srgb, var(--primary) 12%, transparent);
+      width: fit-content;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 14px;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+    }
+
+    .span-3 {
+      grid-column: span 3;
+    }
+
+    .span-4 {
+      grid-column: span 4;
+    }
+
+    .span-6 {
+      grid-column: span 6;
+    }
+
+    .span-8 {
+      grid-column: span 8;
+    }
+
+    .span-12 {
+      grid-column: span 12;
+    }
+
+    label {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      color: var(--text);
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 11px 12px;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 88px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      min-width: 760px;
+      background: var(--panel);
+    }
+
+    th,
+    td {
+      padding: 12px;
+      border-block-end: 1px solid var(--line);
+      text-align: start;
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--muted);
+      background: var(--panel-2);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    tr:last-child td {
+      border-block-end: 0;
+    }
+
+    td input,
+    td select {
+      min-width: 120px;
+    }
+
+    .amount {
+      text-align: end;
+      font-variant-numeric: tabular-nums;
+      font-weight: 800;
+    }
+
+    .totals {
+      display: grid;
+      gap: 8px;
+      margin-inline-start: auto;
+      max-width: 360px;
+      margin-block-start: 16px;
+    }
+
+    .total-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: var(--panel-2);
+      color: var(--muted);
+    }
+
+    .total-line.grand {
+      color: #fff;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      font-size: 20px;
+      font-weight: 900;
+    }
+
+    .notice {
+      border: 1px solid color-mix(in srgb, var(--warning) 38%, var(--line));
+      background: color-mix(in srgb, var(--warning) 12%, var(--panel));
+      color: var(--text);
+      border-radius: 14px;
+      padding: 12px 14px;
+      line-height: 1.65;
+      font-size: 13px;
+    }
+
+    .review {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-block-start: 12px;
+    }
+
+    .review-item {
+      padding: 13px;
+      border-radius: 14px;
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+    }
+
+    .review-item strong {
+      display: block;
+      margin-block-end: 5px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .toast {
+      position: fixed;
+      inset-inline: 18px;
+      inset-block-end: 18px;
+      margin-inline: auto;
+      max-width: 560px;
+      border-radius: 16px;
+      background: color-mix(in srgb, var(--success) 90%, #000 10%);
+      color: #fff;
+      box-shadow: var(--shadow);
+      padding: 16px 18px;
+      display: none;
+      z-index: 20;
+      line-height: 1.5;
+      font-weight: 700;
+    }
+
+    .toast.show {
+      display: block;
+      animation: pop 0.25s ease-out;
+    }
+
+    @keyframes pop {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .empty {
+      color: var(--muted);
+      text-align: center;
+      padding: 20px;
+    }
+
+    @media (max-width: 940px) {
+      .hero,
+      .layout,
+      .preview-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .side {
+        position: static;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .app {
+        padding: 16px;
+      }
+
+      .span-3,
+      .span-4,
+      .span-6,
+      .span-8 {
+        grid-column: span 12;
+      }
+
+      .panel-title,
+      .summary-item {
+        flex-direction: column;
+      }
+
+      .summary-value {
+        text-align: start;
+      }
+
+      .review {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media print {
+      body {
+        background: #fff;
+      }
+
+      .side,
+      .button-row,
+      .dropzone,
+      .toast {
+        display: none;
+      }
+
+      .app {
+        max-width: none;
+        padding: 0;
+      }
+
+      .hero,
+      .layout {
+        display: block;
+      }
+
+      .panel,
+      .hero-card,
+      .summary {
+        box-shadow: none;
+        break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="hero">
+      <div class="hero-card">
+        <div class="eyebrow">Expense Portal</div>
+        <h1>経費申請ページ</h1>
+        <p class="lead">名刺または領収書画像をアップロードし、取引先情報・経費明細・合計金額を確認して申請する想定のインタラクティブHTMLです。入力内容はこのブラウザー内でのみ扱われます。</p>
+      </div>
+      <aside class="summary hero-card" aria-label="申請サマリー">
+        <div class="summary-item">
+          <span class="summary-label">申請番号</span>
+          <span class="summary-value" id="summaryId">EXP-DEMO-0820</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">ステータス</span>
+          <span class="summary-value" id="summaryStatus">下書き</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">合計金額</span>
+          <span class="summary-value" id="summaryTotal">¥0</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">最終更新</span>
+          <span class="summary-value" id="summaryUpdated">未保存</span>
+        </div>
+      </aside>
+    </section>
+
+    <section class="layout">
+      <aside class="side">
+        <nav class="panel steps" aria-label="申請ステップ">
+          <div class="step active" data-step="1"><span class="dot">1</span><span>名刺アップロード</span></div>
+          <div class="step" data-step="2"><span class="dot">2</span><span>申請情報入力</span></div>
+          <div class="step" data-step="3"><span class="dot">3</span><span>明細・金額確認</span></div>
+          <div class="step" data-step="4"><span class="dot">4</span><span>申請確認</span></div>
+        </nav>
+        <div class="panel">
+          <h2>主な機能</h2>
+          <p class="hint">画像プレビュー、読み取り、明細追加、税額計算、下書き保存、申請プレビューを試せます。</p>
+          <div class="button-row">
+            <button class="btn secondary" id="saveDraft" type="button">下書き保存</button>
+            <button class="btn ghost" id="resetForm" type="button">リセット</button>
+          </div>
+        </div>
+      </aside>
+
+      <div>
+        <section class="panel" id="uploadPanel">
+          <div class="panel-title">
+            <div>
+              <h2>1. 名刺・領収書をアップロード</h2>
+              <p class="hint">画像ファイルを選択するとプレビューします。「読み取り」で取引先情報を自動入力します。</p>
+            </div>
+            <span class="badge">画像 / PDF 対応</span>
+          </div>
+
+          <div class="dropzone" id="dropzone">
+            <div class="upload-icon" aria-hidden="true">↑</div>
+            <div>
+              <strong>ここにファイルをドラッグ、または選択してください</strong>
+              <p class="hint">実際のOCRは行わず、申請画面の動作確認用にサンプル値を入れます。</p>
+            </div>
+            <input class="file-input" id="fileInput" type="file" accept="image/*,.pdf">
+            <button class="btn primary" id="chooseFile" type="button">ファイルを選択</button>
+          </div>
+
+          <div class="preview-grid">
+            <div class="preview-box" id="previewBox">プレビューはここに表示されます</div>
+            <div class="ocr-card">
+              <span class="badge" id="fileBadge">未アップロード</span>
+              <strong>読み取り候補</strong>
+              <p class="hint" id="ocrText">ファイル選択後、「読み取り」を押すと、会社名・担当者・利用目的がフォームに反映されます。</p>
+              <div class="button-row">
+                <button class="btn secondary" id="mockRead" type="button">読み取り</button>
+                <button class="btn ghost" id="addSampleReceipt" type="button">サンプル明細を追加</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" id="formPanel">
+          <div class="panel-title">
+            <div>
+              <h2>2. 申請情報</h2>
+              <p class="hint">一般的な経費申請でよく使う項目を配置しています。</p>
+            </div>
+          </div>
+
+          <form id="expenseForm">
+            <div class="grid">
+              <div class="field span-4">
+                <label for="applicant">申請者</label>
+                <input id="applicant" name="applicant" value="Shinya Tanaka" autocomplete="name">
+              </div>
+              <div class="field span-4">
+                <label for="department">部門</label>
+                <input id="department" name="department" value="Modern Workplace Team Unit">
+              </div>
+              <div class="field span-4">
+                <label for="date">利用日</label>
+                <input id="date" name="date" type="date">
+              </div>
+              <div class="field span-4">
+                <label for="category">経費カテゴリ</label>
+                <select id="category" name="category">
+                  <option>接待交際費</option>
+                  <option>交通費</option>
+                  <option>会議費</option>
+                  <option>消耗品費</option>
+                  <option>出張費</option>
+                  <option>その他</option>
+                </select>
+              </div>
+              <div class="field span-4">
+                <label for="payment">支払方法</label>
+                <select id="payment" name="payment">
+                  <option>個人立替</option>
+                  <option>法人カード</option>
+                  <option>請求書払い</option>
+                  <option>その他</option>
+                </select>
+              </div>
+              <div class="field span-4">
+                <label for="project">プロジェクト / 顧客名</label>
+                <input id="project" name="project" placeholder="例: Contoso Copilot Workshop">
+              </div>
+              <div class="field span-6">
+                <label for="company">取引先会社名</label>
+                <input id="company" name="company" placeholder="名刺から読み取り">
+              </div>
+              <div class="field span-6">
+                <label for="contact">取引先担当者</label>
+                <input id="contact" name="contact" placeholder="名刺から読み取り">
+              </div>
+              <div class="field span-12">
+                <label for="purpose">利用目的</label>
+                <textarea id="purpose" name="purpose" placeholder="例: Copilot 活用ワークショップ後の顧客打ち合わせ"></textarea>
+              </div>
+              <div class="field span-12">
+                <label for="notes">備考</label>
+                <textarea id="notes" name="notes" placeholder="承認者への補足、参加者、領収書番号など"></textarea>
+              </div>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel" id="itemsPanel">
+          <div class="panel-title">
+            <div>
+              <h2>3. 経費明細</h2>
+              <p class="hint">明細を追加・削除すると、小計・消費税・合計が自動更新されます。</p>
+            </div>
+            <button class="btn primary" id="addItem" type="button">明細を追加</button>
+          </div>
+
+          <div class="table-wrap">
+            <table aria-label="経費明細">
+              <thead>
+                <tr>
+                  <th>日付</th>
+                  <th>内容</th>
+                  <th>カテゴリ</th>
+                  <th>金額</th>
+                  <th>税区分</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="itemRows">
+                <tr>
+                  <td colspan="6" class="empty">まだ明細がありません。「明細を追加」または「サンプル明細を追加」を押してください。</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="totals" aria-live="polite">
+            <div class="total-line"><span>小計</span><strong id="subtotal">¥0</strong></div>
+            <div class="total-line"><span>消費税相当額</span><strong id="taxTotal">¥0</strong></div>
+            <div class="total-line grand"><span>合計</span><strong id="grandTotal">¥0</strong></div>
+          </div>
+        </section>
+
+        <section class="panel" id="reviewPanel">
+          <div class="panel-title">
+            <div>
+              <h2>4. 申請内容の確認</h2>
+              <p class="hint">入力内容を確認し、申請を完了します。</p>
+            </div>
+          </div>
+          <div class="notice">このページでは、実際の送信・承認ワークフロー・ファイル保存は行いません。</div>
+          <div class="review" id="reviewList"></div>
+          <div class="button-row" style="margin-block-start: 18px;">
+            <button class="btn secondary" id="refreshReview" type="button">確認内容を更新</button>
+            <button class="btn primary" id="submitRequest" type="button">申請する</button>
+            <button class="btn ghost" id="printPage" type="button">印刷 / PDF保存</button>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const state = {
+      items: [],
+      fileName: "",
+      total: 0
+    };
+
+    const yen = new Intl.NumberFormat("ja-JP", {
+      style: "currency",
+      currency: "JPY",
+      maximumFractionDigits: 0
+    });
+
+    const qs = (selector) => document.querySelector(selector);
+    const qsa = (selector) => Array.from(document.querySelectorAll(selector));
+
+    const fields = [
+      "applicant",
+      "department",
+      "date",
+      "category",
+      "payment",
+      "project",
+      "company",
+      "contact",
+      "purpose",
+      "notes"
+    ];
+
+    function today() {
+      return new Date().toISOString().slice(0, 10);
+    }
+
+    function touch(step) {
+      qsa(".step").forEach((node) => {
+        const number = Number(node.dataset.step);
+        node.classList.toggle("active", number === step);
+        node.classList.toggle("done", number < step);
+        const dot = node.querySelector(".dot");
+        dot.textContent = number < step ? "✓" : String(number);
+      });
+      qs("#summaryUpdated").textContent = new Date().toLocaleString("ja-JP", {
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+    }
+
+    function showToast(message) {
+      const toast = qs("#toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      window.setTimeout(() => toast.classList.remove("show"), 3200);
+    }
+
+    function setDefaultDate() {
+      const dateInput = qs("#date");
+      if (!dateInput.value) {
+        dateInput.value = today();
+      }
+    }
+
+    function handleFile(file) {
+      if (!file) return;
+      state.fileName = file.name;
+      qs("#fileBadge").textContent = file.name;
+      qs("#ocrText").textContent = "ファイルを受け取りました。読み取りを実行できます。";
+      const preview = qs("#previewBox");
+      preview.textContent = "";
+
+      if (file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.addEventListener("load", () => {
+          const image = document.createElement("img");
+          image.alt = "アップロードされたファイルのプレビュー";
+          image.src = reader.result;
+          preview.appendChild(image);
+        });
+        reader.readAsDataURL(file);
+      } else {
+        preview.innerHTML = "<strong>PDFファイル</strong><span class=\"hint\">" + escapeHtml(file.name) + "</span>";
+      }
+      touch(1);
+    }
+
+    function mockReadCard() {
+      const samples = [
+        {
+          company: "Contoso 株式会社",
+          contact: "山田 太郎",
+          project: "Contoso Copilot Workshop",
+          purpose: "Copilot 活用ワークショップ後の顧客打ち合わせ"
+        },
+        {
+          company: "Fabrikam Japan",
+          contact: "佐藤 花子",
+          project: "AI エージェント導入相談",
+          purpose: "Copilot Studio 活用に関する提案前の情報交換"
+        },
+        {
+          company: "Northwind Traders",
+          contact: "鈴木 一郎",
+          project: "M365 利活用セッション",
+          purpose: "Microsoft 365 Copilot 展開計画に関する顧客ミーティング"
+        }
+      ];
+      const sample = samples[Math.floor(Math.random() * samples.length)];
+      qs("#company").value = sample.company;
+      qs("#contact").value = sample.contact;
+      qs("#project").value = sample.project;
+      qs("#purpose").value = sample.purpose;
+      qs("#ocrText").textContent = "読み取り結果をフォームへ反映しました。必要に応じて編集してください。";
+      touch(2);
+      updateReview();
+      showToast("名刺情報の読み取りが完了しました。");
+    }
+
+    function addItem(item = {}) {
+      const date = item.date || qs("#date").value || today();
+      state.items.push({
+        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()),
+        date,
+        description: item.description || "",
+        category: item.category || qs("#category").value || "会議費",
+        amount: Number(item.amount || 0),
+        tax: item.tax || "10%"
+      });
+      renderItems();
+      touch(3);
+    }
+
+    function addSampleReceipt() {
+      addItem({
+        description: "顧客打ち合わせ後の会議費",
+        category: "会議費",
+        amount: 6800,
+        tax: "10%"
+      });
+      addItem({
+        description: "訪問先までの交通費",
+        category: "交通費",
+        amount: 1240,
+        tax: "10%"
+      });
+      showToast("サンプル明細を追加しました。");
+    }
+
+    function renderItems() {
+      const body = qs("#itemRows");
+      body.innerHTML = "";
+      if (state.items.length === 0) {
+        const row = document.createElement("tr");
+        row.innerHTML = "<td colspan=\"6\" class=\"empty\">まだ明細がありません。「明細を追加」または「サンプル明細を追加」を押してください。</td>";
+        body.appendChild(row);
+        calculateTotals();
+        return;
+      }
+
+      state.items.forEach((item) => {
+        const row = document.createElement("tr");
+        row.dataset.id = item.id;
+        row.innerHTML = `
+          <td><input data-field="date" type="date" value="${escapeHtml(item.date)}"></td>
+          <td><input data-field="description" value="${escapeHtml(item.description)}" placeholder="例: 会議費"></td>
+          <td>
+            <select data-field="category">
+              ${["接待交際費", "交通費", "会議費", "消耗品費", "出張費", "その他"].map((value) => `<option ${value === item.category ? "selected" : ""}>${value}</option>`).join("")}
+            </select>
+          </td>
+          <td><input data-field="amount" type="number" min="0" step="1" value="${item.amount}"></td>
+          <td>
+            <select data-field="tax">
+              ${["10%", "8%", "非課税"].map((value) => `<option ${value === item.tax ? "selected" : ""}>${value}</option>`).join("")}
+            </select>
+          </td>
+          <td><button class="btn danger" data-action="delete" type="button">削除</button></td>
+        `;
+        body.appendChild(row);
+      });
+      calculateTotals();
+      updateReview();
+    }
+
+    function calculateTotals() {
+      let subtotal = 0;
+      let taxTotal = 0;
+      state.items.forEach((item) => {
+        const amount = Number(item.amount) || 0;
+        subtotal += amount;
+        if (item.tax === "10%") {
+          taxTotal += Math.round(amount * 0.1);
+        } else if (item.tax === "8%") {
+          taxTotal += Math.round(amount * 0.08);
+        }
+      });
+      state.total = subtotal + taxTotal;
+      qs("#subtotal").textContent = yen.format(subtotal);
+      qs("#taxTotal").textContent = yen.format(taxTotal);
+      qs("#grandTotal").textContent = yen.format(state.total);
+      qs("#summaryTotal").textContent = yen.format(state.total);
+    }
+
+    function updateReview() {
+      const data = Object.fromEntries(fields.map((id) => [id, qs("#" + id).value || "未入力"]));
+      const list = qs("#reviewList");
+      const itemCount = state.items.length;
+      list.innerHTML = "";
+      const values = [
+        ["申請者", data.applicant],
+        ["部門", data.department],
+        ["利用日", data.date],
+        ["カテゴリ", data.category],
+        ["支払方法", data.payment],
+        ["プロジェクト / 顧客", data.project],
+        ["取引先", data.company + " / " + data.contact],
+        ["明細数", itemCount + "件"],
+        ["合計金額", yen.format(state.total)],
+        ["添付ファイル", state.fileName || "未添付"],
+        ["利用目的", data.purpose],
+        ["備考", data.notes]
+      ];
+      values.forEach(([label, value]) => {
+        const div = document.createElement("div");
+        div.className = "review-item";
+        div.innerHTML = "<strong>" + escapeHtml(label) + "</strong><span>" + escapeHtml(value) + "</span>";
+        list.appendChild(div);
+      });
+    }
+
+    function saveDraft() {
+      const payload = {
+        fields: Object.fromEntries(fields.map((id) => [id, qs("#" + id).value])),
+        items: state.items,
+        fileName: state.fileName,
+        savedAt: new Date().toISOString()
+      };
+      localStorage.setItem("expenseRequestDraft", JSON.stringify(payload));
+      qs("#summaryStatus").textContent = "下書き保存済み";
+      touch(4);
+      showToast("下書きをこのブラウザーに保存しました。");
+    }
+
+    function loadDraft() {
+      const raw = localStorage.getItem("expenseRequestDraft");
+      if (!raw) return;
+      try {
+        const payload = JSON.parse(raw);
+        Object.entries(payload.fields || {}).forEach(([id, value]) => {
+          const field = qs("#" + id);
+          if (field) field.value = value;
+        });
+        state.items = Array.isArray(payload.items) ? payload.items : [];
+        state.fileName = payload.fileName || "";
+        if (state.fileName) qs("#fileBadge").textContent = state.fileName;
+        renderItems();
+        qs("#summaryStatus").textContent = "下書き復元済み";
+        touch(2);
+      } catch {
+        localStorage.removeItem("expenseRequestDraft");
+      }
+    }
+
+    function submitRequest() {
+      updateReview();
+      qs("#summaryStatus").textContent = "申請済み";
+      touch(4);
+      showToast("申請が完了しました。実際の送信は行われていません。");
+    }
+
+    function resetForm() {
+      localStorage.removeItem("expenseRequestDraft");
+      fields.forEach((id) => {
+        const field = qs("#" + id);
+        if (field.tagName === "SELECT") field.selectedIndex = 0;
+        else field.value = "";
+      });
+      qs("#applicant").value = "Shinya Tanaka";
+      qs("#department").value = "Modern Workplace Team Unit";
+      setDefaultDate();
+      state.items = [];
+      state.fileName = "";
+      state.total = 0;
+      qs("#previewBox").textContent = "プレビューはここに表示されます";
+      qs("#fileBadge").textContent = "未アップロード";
+      qs("#ocrText").textContent = "ファイル選択後、「読み取り」を押すと、会社名・担当者・利用目的がフォームに反映されます。";
+      qs("#summaryStatus").textContent = "下書き";
+      renderItems();
+      updateReview();
+      touch(1);
+      showToast("内容をリセットしました。");
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function setupEvents() {
+      const dropzone = qs("#dropzone");
+      const fileInput = qs("#fileInput");
+
+      qs("#chooseFile").addEventListener("click", () => fileInput.click());
+      fileInput.addEventListener("change", (event) => handleFile(event.target.files[0]));
+
+      ["dragenter", "dragover"].forEach((eventName) => {
+        dropzone.addEventListener(eventName, (event) => {
+          event.preventDefault();
+          dropzone.classList.add("dragging");
+        });
+      });
+
+      ["dragleave", "drop"].forEach((eventName) => {
+        dropzone.addEventListener(eventName, (event) => {
+          event.preventDefault();
+          dropzone.classList.remove("dragging");
+        });
+      });
+
+      dropzone.addEventListener("drop", (event) => handleFile(event.dataTransfer.files[0]));
+      qs("#mockRead").addEventListener("click", mockReadCard);
+      qs("#addSampleReceipt").addEventListener("click", addSampleReceipt);
+      qs("#addItem").addEventListener("click", () => addItem());
+      qs("#saveDraft").addEventListener("click", saveDraft);
+      qs("#resetForm").addEventListener("click", resetForm);
+      qs("#refreshReview").addEventListener("click", () => {
+        updateReview();
+        touch(4);
+        showToast("確認内容を更新しました。");
+      });
+      qs("#submitRequest").addEventListener("click", submitRequest);
+      qs("#printPage").addEventListener("click", () => window.print());
+
+      qs("#itemRows").addEventListener("input", updateItemFromRow);
+      qs("#itemRows").addEventListener("change", updateItemFromRow);
+      qs("#itemRows").addEventListener("click", (event) => {
+        if (event.target.dataset.action !== "delete") return;
+        const row = event.target.closest("tr");
+        state.items = state.items.filter((item) => item.id !== row.dataset.id);
+        renderItems();
+      });
+
+      fields.forEach((id) => {
+        qs("#" + id).addEventListener("input", updateReview);
+        qs("#" + id).addEventListener("change", updateReview);
+      });
+    }
+
+    function updateItemFromRow(event) {
+      const row = event.target.closest("tr");
+      if (!row || !row.dataset.id) return;
+      const item = state.items.find((entry) => entry.id === row.dataset.id);
+      if (!item) return;
+      item[event.target.dataset.field] = event.target.dataset.field === "amount"
+        ? Number(event.target.value)
+        : event.target.value;
+      calculateTotals();
+      updateReview();
+    }
+
+    setDefaultDate();
+    setupEvents();
+    loadDraft();
+    renderItems();
+    updateReview();
+  </script>
+</body>
+</html>
